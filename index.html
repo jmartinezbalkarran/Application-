@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<link rel="manifest" href="manifest.json">
+    <title>Calculadora con Conversión de Moneda</title>
+    <style>
+        /* Estilos generales para el cuerpo de la página */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Contenedor principal de la calculadora */
+        .calculadora-container {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        /* Pantalla de visualización */
+        .display {
+            background-color: #444;
+            color: white;
+            padding: 15px;
+            text-align: right;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+            word-break: break-all;
+            min-height: 50px;
+            box-sizing: border-box;
+        }
+
+        /* Contenedor de los botones */
+        .botones {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        /* Estilos de los botones */
+        .boton {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 1.5em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .boton:hover {
+            background-color: #666;
+        }
+
+        .boton.operador {
+            background-color: #f1a33c;
+        }
+
+        .boton.operador:hover {
+            background-color: #ffb157;
+        }
+
+        .boton.limpiar {
+            background-color: #999;
+        }
+
+        .boton.limpiar:hover {
+            background-color: #aaa;
+        }
+        
+        /* Nuevas clases para los botones de diseño */
+        .boton.boton-largo {
+            grid-row: span 2;
+        }
+        
+        .boton.cero-largo {
+            grid-column: span 2;
+        }
+
+        .boton.igual {
+            grid-column: span 2;
+            background-color: #e04747;
+        }
+
+        .boton.igual:hover {
+            background-color: #ff5c5c;
+        }
+
+        /* Contenedor de la entrada del precio del dólar */
+        .dolar-input-container {
+            margin-bottom: 15px;
+        }
+
+        .dolar-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        /* Estilos para la sección de resultados */
+        .resultados {
+            color: white;
+            text-align: right;
+            margin-top: 15px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculadora-container">
+        <div class="dolar-input-container">
+            <input type="number" id="precio-dolar" class="dolar-input" placeholder="Precio del dólar (Ej: 158.92)" value="158.92">
+        </div>
+
+        <div class="display" id="display">0</div>
+
+        <div class="botones">
+            <button class="boton limpiar" onclick="limpiar()">C</button>
+            <button class="boton" onclick="borrarUltimo()">DEL</button>
+            <button class="boton operador" onclick="agregarOperador('/')">/</button>
+            <button class="boton operador" onclick="agregarOperador('*')">*</button>
+            
+            <button class="boton" onclick="agregarNumero('7')">7</button>
+            <button class="boton" onclick="agregarNumero('8')">8</button>
+            <button class="boton" onclick="agregarNumero('9')">9</button>
+            <button class="boton operador" onclick="agregarOperador('-')">-</button>
+            
+            <button class="boton" onclick="agregarNumero('4')">4</button>
+            <button class="boton" onclick="agregarNumero('5')">5</button>
+            <button class="boton" onclick="agregarNumero('6')">6</button>
+            <button class="boton operador boton-largo" onclick="agregarOperador('+')">+</button>
+            
+            <button class="boton" onclick="agregarNumero('1')">1</button>
+            <button class="boton" onclick="agregarNumero('2')">2</button>
+            <button class="boton" onclick="agregarNumero('3')">3</button>
+
+            <button class="boton cero-largo" onclick="agregarNumero('0')">0</button>
+            <button class="boton" onclick="agregarNumero('.')">.</button>
+            <button class="boton igual" onclick="calcular()">=</button>
+        </div>
+        
+        <div class="resultados">
+            <p id="resultado-bs">Total en Bs: 0</p>
+            <p id="resultado-usd">Total en USD: 0</p>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const resultadoBs = document.getElementById('resultado-bs');
+        const resultadoUsd = document.getElementById('resultado-usd');
+        const precioDolarInput = document.getElementById('precio-dolar');
+        let expresion = '';
+
+        function agregarNumero(valor) {
+            expresion += valor;
+            display.innerText = expresion;
+        }
+
+        function agregarOperador(operador) {
+            expresion += operador;
+            display.innerText = expresion;
+        }
+
+        function limpiar() {
+            expresion = '';
+            display.innerText = '0';
+            resultadoBs.innerText = 'Total en Bs: 0';
+            resultadoUsd.innerText = 'Total en USD: 0';
+        }
+
+        function borrarUltimo() {
+            expresion = expresion.slice(0, -1);
+            if (expresion === '') {
+                display.innerText = '0';
+            } else {
+                display.innerText = expresion;
+            }
+        }
+
+        function calcular() {
+            try {
+                const totalDolares = eval(expresion);
+                
+                display.innerText = totalDolares;
+                
+                const precioDolar = parseFloat(precioDolarInput.value);
+                if (isNaN(precioDolar) || precioDolar <= 0) {
+                    alert('Por favor, ingresa un precio válido para el dólar.');
+                    limpiar();
+                    return;
+                }
+                
+                const totalBolivares = totalDolares * precioDolar;
+                
+                resultadoBs.innerText = `Total en Bs: ${totalBolivares.toFixed(2)}`;
+                resultadoUsd.innerText = `Total en USD: ${totalDolares.toFixed(2)}`;
+                
+                expresion = totalDolares.toString();
+            } catch (error) {
+                display.innerText = 'Error';
+                expresion = '';
+            }
+        }
+    </script>
+</body>
+</html>
