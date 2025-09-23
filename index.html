@@ -226,7 +226,7 @@
         
         <div class="resultados">
             <p id="resultado-bs">Total en Bs: 0</p>
-            <p id="resultado-usd">Total en USD: 0</p>
+            <p id="resultado-usd"></p>
         </div>
     </div>
 
@@ -262,7 +262,6 @@
             expresion = '';
             display.innerText = '0';
             resultadoBs.innerText = 'Total en Bs: 0';
-            resultadoUsd.innerText = 'Total en USD: 0';
         }
 
         function borrarUltimo() {
@@ -290,8 +289,7 @@
                 const totalBolivares = totalDolares * precioDolar;
                 
                 resultadoBs.innerText = `Total en Bs: ${totalBolivares.toFixed(2)}`;
-                resultadoUsd.innerText = `Total en USD: ${totalDolares.toFixed(2)}`;
-                
+           
                 expresion = totalDolares.toString();
             } catch (error) {
                 display.innerText = 'Error';
