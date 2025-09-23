@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    	<link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
     <title>Calculadora con Conversión de Moneda</title>
     <style>
         /* Estilos generales para el cuerpo de la página */
@@ -123,12 +123,78 @@
             margin-top: 15px;
             font-size: 1.2em;
         }
+
+        /* Estilos para el modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden; /* Oculto por defecto */
+            opacity: 0;
+            transition: visibility 0s, opacity 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: #333;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            box-sizing: border-box;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 1px solid #555;
+            border-radius: 5px;
+            margin: 15px 0;
+            box-sizing: border-box;
+            background-color: #444;
+            color: white;
+        }
+
+        .modal-button {
+            background-color: #e04747;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .modal-button:hover {
+            background-color: #ff5c5c;
+        }
     </style>
 </head>
 <body>
     <div class="calculadora-container">
         <div class="dolar-input-container">
-            <input type="number" id="precio-dolar" class="dolar-input" placeholder="Precio del dólar (Ej: 158.92)" value="158.92">
+            <input type="number" id="precio-dolar" class="dolar-input" placeholder="Precio del dólar (Ej: 158.92)" value="0" readonly>
         </div>
 
         <div class="display" id="display">0</div>
@@ -164,11 +230,22 @@
         </div>
     </div>
 
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Tasa de Cambio del Dólar</h3>
+            <p>Por favor, ingresa el precio actual del dólar.</p>
+            <input type="number" id="modal-precio-dolar" class="modal-input" placeholder="Ej: 158.92">
+            <button class="modal-button" onclick="guardarPrecioDolar()">Guardar</button>
+        </div>
+    </div>
+
     <script>
         const display = document.getElementById('display');
         const resultadoBs = document.getElementById('resultado-bs');
         const resultadoUsd = document.getElementById('resultado-usd');
         const precioDolarInput = document.getElementById('precio-dolar');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalPrecioDolarInput = document.getElementById('modal-precio-dolar');
         let expresion = '';
 
         function agregarNumero(valor) {
@@ -221,6 +298,22 @@
                 expresion = '';
             }
         }
+
+        function guardarPrecioDolar() {
+            const precioDolar = parseFloat(modalPrecioDolarInput.value);
+            if (isNaN(precioDolar) || precioDolar <= 0) {
+                alert('Por favor, ingresa un precio válido y mayor a cero.');
+                return;
+            }
+            precioDolarInput.value = precioDolar.toFixed(2);
+            modalOverlay.classList.remove('visible');
+        }
+
+        // Muestra el modal cuando la página se carga
+        window.onload = function() {
+            modalOverlay.classList.add('visible');
+            modalPrecioDolarInput.focus();
+        };
     </script>
 </body>
 </html>
