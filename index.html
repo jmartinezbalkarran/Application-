@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora USD a VES</title>
+    <title>Calculadora Bidireccional USD ↔ VES</title>
     <style>
         * {
             box-sizing: border-box;
@@ -33,26 +33,47 @@
         .calculator-header {
             background: #2c3e50;
             color: white;
-            padding: 20px;
+            padding: 15px 20px;
             text-align: center;
         }
         
         .calculator-header h1 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
         }
         
         .exchange-rate {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             opacity: 0.9;
             background: rgba(255, 255, 255, 0.1);
-            padding: 8px;
+            padding: 6px;
             border-radius: 5px;
+            margin-top: 8px;
+        }
+        
+        .mode-toggle {
             margin-top: 10px;
         }
         
+        .toggle-btn {
+            background: #ff9800;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn:hover {
+            background: #f57c00;
+            transform: scale(1.05);
+        }
+        
         .display-container {
-            padding: 20px;
+            padding: 15px 20px;
             background-color: #f8f9fa;
             border-bottom: 1px solid #e9ecef;
         }
@@ -61,14 +82,8 @@
             display: flex;
             align-items: center;
             margin-bottom: 5px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #6c757d;
-        }
-        
-        .currency-label::before {
-            content: "→";
-            margin-right: 5px;
-            font-weight: bold;
         }
         
         .display {
@@ -102,15 +117,15 @@
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            padding: 20px;
+            gap: 8px;
+            padding: 15px;
         }
         
         button {
             border: none;
             border-radius: 10px;
-            padding: 15px 0;
-            font-size: 1.2rem;
+            padding: 12px 0;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -164,38 +179,54 @@
         .error-message {
             color: #e53935;
             text-align: center;
-            padding: 10px;
-            font-size: 0.9rem;
+            padding: 8px;
+            font-size: 0.8rem;
         }
         
         .footer {
             text-align: center;
-            padding: 10px;
-            font-size: 0.8rem;
+            padding: 8px;
+            font-size: 0.75rem;
             color: #6c757d;
             border-top: 1px solid #e9ecef;
         }
         
         .flag {
             display: inline-block;
-            margin: 0 5px;
-            font-size: 1.2em;
+            margin: 0 3px;
+            font-size: 1em;
+        }
+        
+        .input-label, .output-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
     <div class="calculator-container">
         <div class="calculator-header">
-            <h1>Calculadora USD a Bolívares</h1>
+            <h1>Calculadora USD ↔ VES</h1>
             <div class="exchange-rate">
                 <span class="flag">🇺🇸</span> 1 USD = <span id="exchange-rate">Cargando...</span> VES <span class="flag">🇻🇪</span>
+            </div>
+            <div class="mode-toggle">
+                <button class="toggle-btn" id="mode-toggle">Cambiar a VES → USD</button>
             </div>
         </div>
         
         <div class="display-container">
-            <div class="currency-label">Ingresa la cantidad en Dólares (USD)</div>
+            <div class="input-label" id="input-label">
+                <span class="flag">🇺🇸</span> Ingresa cantidad en Dólares (USD)
+            </div>
             <input type="text" class="display" id="display" readonly value="0">
-            <div class="currency-label">Resultado en Bolívares (VES)</div>
+            <div class="output-label" id="output-label">
+                <span class="flag">🇻🇪</span> Resultado en Bolívares (VES)
+            </div>
             <div class="conversion-result" id="conversion-result">0,00 Bs.S</div>
         </div>
         
@@ -227,19 +258,24 @@
         <div class="error-message" id="error-message"></div>
         
         <div class="footer">
-            Realiza operaciones en USD y obtén el resultado en Bolívares
+            Realiza operaciones y convierte entre Dólares y Bolívares
         </div>
     </div>
 
     <script>
         // Variable para almacenar la tasa de cambio actual (USD a VES)
         let exchangeRate = 1;
+        // Variable para controlar el modo (true: USD → VES, false: VES → USD)
+        let isUsdToVesMode = true;
         
         // Obtener elementos del DOM
         const display = document.getElementById('display');
         const conversionResult = document.getElementById('conversion-result');
         const exchangeRateElement = document.getElementById('exchange-rate');
         const errorMessage = document.getElementById('error-message');
+        const modeToggle = document.getElementById('mode-toggle');
+        const inputLabel = document.getElementById('input-label');
+        const outputLabel = document.getElementById('output-label');
         
         // Función para obtener la tasa de cambio actual
         async function fetchExchangeRate() {
@@ -248,6 +284,10 @@
                  const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
                  const data = await response.json();
                  exchangeRate = data.rates.VES;
+                
+                // Para este ejemplo, simulamos una tasa de cambio actualizada
+                //1 USD = 36.50 VES (ejemplo, actualiza según la tasa real)
+                //exchangeRate = 36.50;
                 exchangeRateElement.textContent = `${exchangeRate.toFixed(2)}`;
                 
                 // Actualizar también el resultado si ya hay un valor en pantalla
@@ -257,6 +297,28 @@
             } catch (error) {
                 console.error('Error al obtener la tasa de cambio:', error);
                 exchangeRateElement.textContent = 'Error al cargar tasa';
+            }
+        }
+        
+        // Función para cambiar entre modos
+        function toggleMode() {
+            isUsdToVesMode = !isUsdToVesMode;
+            
+            if (isUsdToVesMode) {
+                modeToggle.textContent = 'Cambiar a VES → USD';
+                inputLabel.innerHTML = '<span class="flag">🇺🇸</span> Ingresa cantidad en Dólares (USD)';
+                outputLabel.innerHTML = '<span class="flag">🇻🇪</span> Resultado en Bolívares (VES)';
+            } else {
+                modeToggle.textContent = 'Cambiar a USD → VES';
+                inputLabel.innerHTML = '<span class="flag">🇻🇪</span> Ingresa cantidad en Bolívares (VES)';
+                outputLabel.innerHTML = '<span class="flag">🇺🇸</span> Resultado en Dólares (USD)';
+            }
+            
+            // Actualizar el cálculo si hay un valor en pantalla
+            if (display.value !== '0') {
+                calculate();
+            } else {
+                conversionResult.textContent = isUsdToVesMode ? '0,00 Bs.S' : '$0.00';
             }
         }
         
@@ -274,7 +336,7 @@
         // Función para limpiar la pantalla
         function clearDisplay() {
             display.value = '0';
-            conversionResult.textContent = '0,00 Bs.S';
+            conversionResult.textContent = isUsdToVesMode ? '0,00 Bs.S' : '$0.00';
             errorMessage.textContent = '';
         }
         
@@ -291,7 +353,7 @@
             if (display.value !== '0') {
                 calculate();
             } else {
-                conversionResult.textContent = '0,00 Bs.S';
+                conversionResult.textContent = isUsdToVesMode ? '0,00 Bs.S' : '$0.00';
             }
         }
         
@@ -309,9 +371,21 @@
                 // Mostrar el resultado
                 display.value = result;
                 
-                // Convertir a bolívares y mostrar
-                const converted = result * exchangeRate;
-                conversionResult.textContent = `${formatCurrency(converted)} Bs.S`;
+                // Convertir según el modo
+                let converted;
+                let formattedResult;
+                
+                if (isUsdToVesMode) {
+                    // Modo USD → VES
+                    converted = result * exchangeRate;
+                    formattedResult = `${formatCurrency(converted)} Bs.S`;
+                } else {
+                    // Modo VES → USD
+                    converted = result / exchangeRate;
+                    formattedResult = `$${converted.toFixed(2)}`;
+                }
+                
+                conversionResult.textContent = formattedResult;
                 
             } catch (error) {
                 errorMessage.textContent = 'Error: Operación no válida';
@@ -345,12 +419,20 @@
                 case 'Backspace':
                     deleteLast();
                     break;
+                case 'm':
+                case 'M':
+                    // Tecla M para cambiar modo
+                    toggleMode();
+                    break;
             }
         });
         
         // Inicializar la calculadora
         window.onload = function() {
             fetchExchangeRate();
+            
+            // Agregar evento al botón de cambio de modo
+            modeToggle.addEventListener('click', toggleMode);
             
             // Actualizar la tasa cada 30 segundos (simulado)
             setInterval(fetchExchangeRate, 30000);
