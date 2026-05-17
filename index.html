@@ -2,442 +2,753 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Bidireccional USD ↔ VES</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Calculadora Jmartinez - Conversión Bs / $</title>
     <style>
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
         }
-        
+
         body {
+            background: linear-gradient(135deg, #1e1e2f 0%, #0f0f1a 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Segoe UI', 'Roboto', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
             padding: 20px;
         }
-        
-        .calculator-container {
-            background-color: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+
+        .calculator {
+            background: #1a1a2e;
+            border-radius: 48px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 28px 24px 32px 24px;
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
+            transition: all 0.2s ease;
         }
-        
-        .calculator-header {
-            background: #2c3e50;
-            color: white;
-            padding: 15px 20px;
+
+        /* Encabezado con título */
+        .header {
             text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .calculator-header h1 {
+
+        .header h1 {
             font-size: 1.4rem;
-            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ff8c42;
+            letter-spacing: 1px;
+            margin: 0;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
-        
-        .exchange-rate {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 6px;
-            border-radius: 5px;
-            margin-top: 8px;
-        }
-        
-        .mode-toggle {
-            margin-top: 10px;
-        }
-        
-        .toggle-btn {
-            background: #ff9800;
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.75rem;
-            transition: all 0.3s;
-        }
-        
-        .toggle-btn:hover {
-            background: #f57c00;
-            transform: scale(1.05);
-        }
-        
-        .display-container {
-            padding: 15px 20px;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        .currency-label {
+
+        .display-dual {
+            background: #0a0a15;
+            border-radius: 32px;
+            padding: 24px 20px;
+            margin-bottom: 28px;
+            box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.05);
+            min-height: 180px;
             display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-            font-size: 0.85rem;
-            color: #6c757d;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        
-        .display {
-            width: 100%;
-            height: 60px;
-            background-color: #ffffff;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            font-size: 1.8rem;
+
+        .expression {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Courier New', 'Monaco', monospace;
             text-align: right;
-            padding: 0 15px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            word-break: break-all;
+            line-height: 1.2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+            min-height: 85px;
         }
-        
-        .conversion-result {
-            width: 100%;
-            height: 50px;
-            background-color: #e8f5e9;
-            border: 1px solid #c8e6c9;
-            border-radius: 10px;
+
+        .result {
             font-size: 1.2rem;
+            color: #6b7280;
+            font-family: 'Courier New', 'Monaco', monospace;
             text-align: right;
-            padding: 0 15px;
-            line-height: 50px;
-            color: #2e7d32;
-            font-weight: bold;
+            min-height: 28px;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+            font-weight: 500;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
         }
-        
+
+        .result.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .conversion-display {
+            font-size: 1rem;
+            color: #ff8c42;
+            font-family: 'Courier New', 'Monaco', monospace;
+            text-align: right;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+            font-weight: 500;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+            border-top: 1px dashed rgba(255, 140, 66, 0.3);
+            padding-top: 8px;
+        }
+
+        .conversion-display.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            padding: 15px;
+            gap: 12px;
         }
-        
-        button {
+
+        .btn {
+            background: #2d2d44;
             border: none;
-            border-radius: 10px;
-            padding: 12px 0;
-            font-size: 1.1rem;
+            border-radius: 28px;
+            font-size: 1.6rem;
+            font-weight: 600;
+            padding: 18px 0;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        button:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .number {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        
-        .number:hover {
-            background-color: #e9ecef;
-        }
-        
-        .operator {
-            background-color: #4a6572;
-            color: white;
-        }
-        
-        .operator:hover {
-            background-color: #344955;
-        }
-        
-        .equals {
-            background-color: #ff9800;
-            color: white;
-        }
-        
-        .equals:hover {
-            background-color: #f57c00;
-        }
-        
-        .clear {
-            background-color: #e53935;
-            color: white;
-        }
-        
-        .clear:hover {
-            background-color: #c62828;
-        }
-        
-        .zero {
-            grid-column: span 2;
-        }
-        
-        .error-message {
-            color: #e53935;
-            text-align: center;
-            padding: 8px;
-            font-size: 0.8rem;
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 8px;
-            font-size: 0.75rem;
-            color: #6c757d;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .flag {
-            display: inline-block;
-            margin: 0 3px;
-            font-size: 1em;
-        }
-        
-        .input-label, .output-label {
+            color: #e2e2e8;
+            transition: all 0.08s linear;
+            font-family: 'Segoe UI', 'Roboto', monospace;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
+            box-shadow: 0 4px 0 #151525;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #151525;
+        }
+
+        .btn-operation {
+            background: #ff8c42;
+            color: white;
+            box-shadow: 0 4px 0 #c96f2e;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .btn-equals {
+            background: #2ecc71;
+            color: white;
+            box-shadow: 0 4px 0 #229954;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .btn-currency {
+            background: #9b59b6;
+            color: white;
+            box-shadow: 0 4px 0 #6c3483;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .btn-clear-all {
+            background: #e74c3c;
+            box-shadow: 0 4px 0 #c0392b;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .btn-backspace {
+            background: #5a6e7c;
+            box-shadow: 0 4px 0 #3d4d59;
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+
+        .btn-sign, .btn-percent {
+            background: #3d3d5c;
+            box-shadow: 0 4px 0 #25253a;
+            font-size: 1.4rem;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+
+        @media (hover: hover) {
+            .btn:hover {
+                filter: brightness(1.08);
+                transform: translateY(-1px);
+            }
+            .btn:active {
+                transform: translateY(2px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                padding: 20px 18px 24px 18px;
+            }
+            .buttons {
+                gap: 10px;
+            }
+            .btn {
+                padding: 14px 0;
+                font-size: 1.4rem;
+            }
+            .expression {
+                font-size: 2.5rem;
+                min-height: 65px;
+            }
+            .result {
+                font-size: 1rem;
+            }
+            .conversion-display {
+                font-size: 0.85rem;
+            }
+            .header h1 {
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="calculator-container">
-        <div class="calculator-header">
-            <h1>Calculadora USD ↔ VES</h1>
-<h2>Jmartinez</h2>
-            <div class="exchange-rate">
-                <span class="flag">🇺🇸</span> 1 USD = <span id="exchange-rate">Cargando...</span> VES <span class="flag">🇻🇪</span>
-            </div>
-            <div class="mode-toggle">
-                <button class="toggle-btn" id="mode-toggle">Cambiar a VES → USD</button>
-            </div>
-        </div>
-        
-        <div class="display-container">
-            <div class="input-label" id="input-label">
-                <span class="flag">🇺🇸</span> Ingresa cantidad en Dólares (USD)
-            </div>
-            <input type="text" class="display" id="display" readonly value="0">
-            <div class="output-label" id="output-label">
-                <span class="flag">🇻🇪</span> Resultado en Bolívares (VES)
-            </div>
-            <div class="conversion-result" id="conversion-result">0,00 Bs.S</div>
-        </div>
-        
-        <div class="buttons">
-            <button class="clear" onclick="clearDisplay()">C</button>
-            <button class="operator" onclick="deleteLast()">⌫</button>
-            <button class="operator" onclick="appendToDisplay('/')">/</button>
-            <button class="operator" onclick="appendToDisplay('*')">×</button>
-            
-            <button class="number" onclick="appendToDisplay('7')">7</button>
-            <button class="number" onclick="appendToDisplay('8')">8</button>
-            <button class="number" onclick="appendToDisplay('9')">9</button>
-            <button class="operator" onclick="appendToDisplay('-')">-</button>
-            
-            <button class="number" onclick="appendToDisplay('4')">4</button>
-            <button class="number" onclick="appendToDisplay('5')">5</button>
-            <button class="number" onclick="appendToDisplay('6')">6</button>
-            <button class="operator" onclick="appendToDisplay('+')">+</button>
-            
-            <button class="number" onclick="appendToDisplay('1')">1</button>
-            <button class="number" onclick="appendToDisplay('2')">2</button>
-            <button class="number" onclick="appendToDisplay('3')">3</button>
-            <button class="equals" onclick="calculate()" rowspan="2">=</button>
-            
-            <button class="number zero" onclick="appendToDisplay('0')">0</button>
-            <button class="number" onclick="appendToDisplay('.')">.</button>
-        </div>
-        
-        <div class="error-message" id="error-message"></div>
-        
-        <div class="footer">
-            Realiza operaciones y convierte entre Dólares y Bolívares
-        </div>
+<div class="calculator">
+    <div class="header">
+        <h1>Jmartinez</h1>
     </div>
+    <div class="display-dual">
+        <div class="expression" id="expression">0</div>
+        <div class="result" id="result">0</div>
+        <div class="conversion-display" id="conversionDisplay"></div>
+    </div>
+    <div class="buttons">
+        <!-- Fila 1 -->
+        <button class="btn btn-clear-all" data-action="ac">AC</button>
+        <button class="btn btn-backspace" data-action="backspace">⌫</button>
+        <button class="btn btn-percent" data-action="percent">%</button>
+        <button class="btn btn-operation" data-op="/">÷</button>
 
-    <script>
-        // Variable para almacenar la tasa de cambio actual (USD a VES)
-        let exchangeRate = 1;
-        // Variable para controlar el modo (true: USD → VES, false: VES → USD)
-        let isUsdToVesMode = true;
+        <!-- Fila 2 -->
+        <button class="btn" data-digit="7">7</button>
+        <button class="btn" data-digit="8">8</button>
+        <button class="btn" data-digit="9">9</button>
+        <button class="btn btn-operation" data-op="*">×</button>
+
+        <!-- Fila 3 -->
+        <button class="btn" data-digit="4">4</button>
+        <button class="btn" data-digit="5">5</button>
+        <button class="btn" data-digit="6">6</button>
+        <button class="btn btn-operation" data-op="-">−</button>
+
+        <!-- Fila 4 -->
+        <button class="btn" data-digit="1">1</button>
+        <button class="btn" data-digit="2">2</button>
+        <button class="btn" data-digit="3">3</button>
+        <button class="btn btn-operation" data-op="+">+</button>
+
+        <!-- Fila 5 -->
+        <button class="btn btn-zero" data-digit="0">0</button>
+        <button class="btn" data-dot=".">.</button>
+        <button class="btn btn-sign" data-action="sign">+/−</button>
+        <button class="btn btn-currency" data-action="convertBs">Bs</button>
         
-        // Obtener elementos del DOM
-        const display = document.getElementById('display');
-        const conversionResult = document.getElementById('conversion-result');
-        const exchangeRateElement = document.getElementById('exchange-rate');
-        const errorMessage = document.getElementById('error-message');
-        const modeToggle = document.getElementById('mode-toggle');
-        const inputLabel = document.getElementById('input-label');
-        const outputLabel = document.getElementById('output-label');
-        
-        // Función para obtener la tasa de cambio actual
-        async function fetchExchangeRate() {
-            try {
-                // En un entorno real, usarías una API como:
-                 const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-                 const data = await response.json();
-                 exchangeRate = data.rates.VES;
-                
-                // Para este ejemplo, simulamos una tasa de cambio actualizada
-                //1 USD = 36.50 VES (ejemplo, actualiza según la tasa real)
-                //exchangeRate = 36.50;
-                exchangeRateElement.textContent = `${exchangeRate.toFixed(2)}`;
-                
-                // Actualizar también el resultado si ya hay un valor en pantalla
-                if (display.value !== '0') {
-                    calculate();
-                }
-            } catch (error) {
-                console.error('Error al obtener la tasa de cambio:', error);
-                exchangeRateElement.textContent = 'Error al cargar tasa';
-            }
+        <!-- Fila 6 -->
+        <button class="btn btn-equals" data-action="equals">=</button>
+        <button class="btn btn-currency" data-action="convertUsd">$</button>
+    </div>
+</div>
+
+<script>
+    // ==============================================================
+    // CALCULADORA JMARTINEZ - CON FORMATO DE MILES, BORRADO UNO A UNO
+    // ==============================================================
+    
+    let currentExpression = "";
+    let currentResult = "0";
+    let lastWasOperator = false;
+    let lastWasEquals = false;
+    let errorFlag = false;
+    let hasSecondValue = false;
+    
+    let exchangeRate = null;
+    let isConverting = false;
+    
+    const expressionEl = document.getElementById('expression');
+    const resultEl = document.getElementById('result');
+    const conversionDisplayEl = document.getElementById('conversionDisplay');
+    
+    // ----- Formateo de miles -----
+    function formatNumberWithCommas(numStr) {
+        if (!numStr || numStr === "Error") return numStr;
+        if (numStr.includes(',')) return numStr;
+        let parts = numStr.split('.');
+        let integerPart = parts[0];
+        let decimalPart = parts.length > 1 ? '.' + parts[1] : '';
+        let sign = '';
+        if (integerPart.startsWith('-')) {
+            sign = '-';
+            integerPart = integerPart.substring(1);
         }
-        
-        // Función para cambiar entre modos
-        function toggleMode() {
-            isUsdToVesMode = !isUsdToVesMode;
-            
-            if (isUsdToVesMode) {
-                modeToggle.textContent = 'Cambiar a VES → USD';
-                inputLabel.innerHTML = '<span class="flag">🇺🇸</span> Ingresa cantidad en Dólares (USD)';
-                outputLabel.innerHTML = '<span class="flag">🇻🇪</span> Resultado en Bolívares (VES)';
+        integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return sign + integerPart + decimalPart;
+    }
+    
+    // ----- API tasa de cambio -----
+    async function fetchExchangeRate() {
+        try {
+            const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+            if (!response.ok) throw new Error('Error al obtener tasa de cambio');
+            const data = await response.json();
+            if (data && data.rates && data.rates.VES) {
+                exchangeRate = data.rates.VES;
+                console.log('Tasa USD/VES actualizada:', exchangeRate);
+                return exchangeRate;
             } else {
-                modeToggle.textContent = 'Cambiar a USD → VES';
-                inputLabel.innerHTML = '<span class="flag">🇻🇪</span> Ingresa cantidad en Bolívares (VES)';
-                outputLabel.innerHTML = '<span class="flag">🇺🇸</span> Resultado en Dólares (USD)';
+                throw new Error('Tasa VES no disponible');
             }
-            
-            // Actualizar el cálculo si hay un valor en pantalla
-            if (display.value !== '0') {
-                calculate();
+        } catch (error) {
+            console.error('Error fetching exchange rate:', error);
+            exchangeRate = null;
+            return null;
+        }
+    }
+    
+    // ----- Visibilidad de pantallas -----
+    function toggleResultVisibility() {
+        const shouldShow = hasSecondValue || 
+                          (currentExpression.includes('+') || 
+                           currentExpression.includes('-') || 
+                           currentExpression.includes('*') || 
+                           currentExpression.includes('/') || 
+                           currentExpression.includes('×') || 
+                           currentExpression.includes('÷')) ||
+                          (lastWasOperator && currentExpression.length > 0);
+        
+        if (shouldShow && !errorFlag && !lastWasEquals) {
+            resultEl.classList.add('visible');
+        } else {
+            resultEl.classList.remove('visible');
+        }
+    }
+    
+    function hideConversionDisplay() {
+        conversionDisplayEl.classList.remove('visible');
+        conversionDisplayEl.innerText = '';
+        isConverting = false;
+    }
+    
+    function showConversion(text) {
+        conversionDisplayEl.innerText = text;
+        conversionDisplayEl.classList.add('visible');
+        isConverting = true;
+    }
+    
+    // ----- Actualizar display principal -----
+    function updateDisplay() {
+        if (errorFlag) {
+            expressionEl.innerText = "Error";
+            resultEl.innerText = "Error";
+            resultEl.classList.add('visible');
+            hideConversionDisplay();
+            return;
+        }
+        
+        if (lastWasEquals && !currentExpression) {
+            expressionEl.innerText = formatNumberWithCommas(currentResult);
+            resultEl.classList.remove('visible');
+        } else if (currentExpression === "") {
+            expressionEl.innerText = "0";
+            resultEl.classList.remove('visible');
+            hasSecondValue = false;
+            hideConversionDisplay();
+        } else {
+            if (!/[+\-*/÷×]/.test(currentExpression)) {
+                expressionEl.innerText = formatNumberWithCommas(currentExpression);
             } else {
-                conversionResult.textContent = isUsdToVesMode ? '0,00 Bs.S' : '$0.00';
+                expressionEl.innerText = currentExpression;
             }
         }
         
-        // Función para agregar valores a la pantalla
-        function appendToDisplay(value) {
-            errorMessage.textContent = '';
-            
-            if (display.value === '0' && value !== '.') {
-                display.value = value;
-            } else {
-                display.value += value;
-            }
-        }
+        resultEl.innerText = formatNumberWithCommas(currentResult);
+        toggleResultVisibility();
+    }
+    
+    // ----- Evaluación de expresiones -----
+    function evaluateExpression(expr) {
+        if (!expr || expr.trim() === "") return 0;
         
-        // Función para limpiar la pantalla
-        function clearDisplay() {
-            display.value = '0';
-            conversionResult.textContent = isUsdToVesMode ? '0,00 Bs.S' : '$0.00';
-            errorMessage.textContent = '';
-        }
-        
-        // Función para eliminar el último carácter
-        function deleteLast() {
-            if (display.value.length > 1) {
-                display.value = display.value.slice(0, -1);
-            } else {
-                display.value = '0';
-            }
-            errorMessage.textContent = '';
-            
-            // Si después de borrar queda algo, calcular de nuevo
-            if (display.value !== '0') {
-                calculate();
-            } else {
-                conversionResult.textContent = isUsdToVesMode ? '0,00 Bs.S' : '$0.00';
-            }
-        }
-        
-        // Función para calcular el resultado
-        function calculate() {
-            try {
-                // Evaluar la expresión matemática
-                let result = eval(display.value);
-                
-                // Verificar si el resultado es válido
-                if (isNaN(result) || !isFinite(result)) {
-                    throw new Error('Operación no válida');
-                }
-                
-                // Mostrar el resultado
-                display.value = result;
-                
-                // Convertir según el modo
-                let converted;
-                let formattedResult;
-                
-                if (isUsdToVesMode) {
-                    // Modo USD → VES
-                    converted = result * exchangeRate;
-                    formattedResult = `${formatCurrency(converted)} Bs.S`;
-                } else {
-                    // Modo VES → USD
-                    converted = result / exchangeRate;
-                    formattedResult = `$${converted.toFixed(2)}`;
-                }
-                
-                conversionResult.textContent = formattedResult;
-                
-            } catch (error) {
-                errorMessage.textContent = 'Error: Operación no válida';
-                console.error('Error en el cálculo:', error);
-            }
-        }
-        
-        // Función para formatear la moneda con separadores de miles y decimales
-        function formatCurrency(value) {
-            return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-        }
-        
-        // Permitir el uso del teclado
-        document.addEventListener('keydown', function(event) {
-            const key = event.key;
-            
-            // Números y operadores
-            if (/[\d+\-*/.=]/.test(key)) {
-                if (key === '=' || key === 'Enter') {
-                    calculate();
-                } else {
-                    appendToDisplay(key);
-                }
-            }
-            
-            // Teclas especiales
-            switch(key) {
-                case 'Escape':
-                    clearDisplay();
-                    break;
-                case 'Backspace':
-                    deleteLast();
-                    break;
-                case 'm':
-                case 'M':
-                    // Tecla M para cambiar modo
-                    toggleMode();
-                    break;
-            }
+        let evalExpr = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/(\d+)%/g, (match, num) => {
+            return (parseFloat(num) / 100).toString();
         });
         
-        // Inicializar la calculadora
-        window.onload = function() {
-            fetchExchangeRate();
-            
-            // Agregar evento al botón de cambio de modo
-            modeToggle.addEventListener('click', toggleMode);
-            
-            // Actualizar la tasa cada 30 segundos (simulado)
-            setInterval(fetchExchangeRate, 30000);
-        };
-    </script>
+        evalExpr = evalExpr.replace(/(\d+(?:\.\d+)?)([+\-*/])(\d+(?:\.\d+)?)%/g, (match, num1, op, num2) => {
+            let percentValue = (parseFloat(num1) * parseFloat(num2)) / 100;
+            return `${num1}${op}${percentValue}`;
+        });
+        
+        evalExpr = evalExpr.replace(/([+\-*/])(\d+(?:\.\d+)?)%/g, (match, op, num) => {
+            return `${op}${parseFloat(num) / 100}`;
+        });
+        
+        try {
+            if (!/^[\d+\-*/%.]+$/.test(evalExpr.replace(/\s/g, ''))) {
+                return "Error";
+            }
+            const result = Function('"use strict";return (' + evalExpr + ')')();
+            if (!isFinite(result) || isNaN(result)) return "Error";
+            let rounded = Math.round(result * 10000000000) / 10000000000;
+            if (Object.is(rounded, -0)) rounded = 0;
+            if (Math.abs(rounded) > 1e12 || (Math.abs(rounded) < 1e-6 && rounded !== 0)) {
+                return rounded.toExponential(8);
+            }
+            return rounded.toString();
+        } catch (e) {
+            return "Error";
+        }
+    }
+    
+    function updateRealtimeResult() {
+        if (errorFlag) return;
+        if (currentExpression === "") {
+            currentResult = "0";
+            hasSecondValue = false;
+            updateDisplay();
+            return;
+        }
+        const hasOperator = /[+\-*/÷×]/.test(currentExpression);
+        const endsWithOperator = /[+\-*/÷×]$/.test(currentExpression);
+        hasSecondValue = hasOperator && !endsWithOperator;
+        
+        if (endsWithOperator) {
+            let exprWithoutLastOp = currentExpression.slice(0, -1);
+            if (exprWithoutLastOp === "") {
+                currentResult = "0";
+            } else {
+                let evalResult = evaluateExpression(exprWithoutLastOp);
+                if (evalResult === "Error") {
+                    currentResult = "Error";
+                    errorFlag = true;
+                } else {
+                    currentResult = evalResult;
+                }
+            }
+        } else {
+            let evalResult = evaluateExpression(currentExpression);
+            if (evalResult === "Error") {
+                currentResult = "Error";
+                errorFlag = true;
+            } else {
+                currentResult = evalResult;
+            }
+        }
+        updateDisplay();
+    }
+    
+    // ----- Borrado uno a uno (backspace) -----
+    function backspace() {
+        if (errorFlag) {
+            allClear();
+            return;
+        }
+        hideConversionDisplay();
+        if (lastWasEquals) {
+            currentExpression = "";
+            lastWasEquals = false;
+            currentResult = "0";
+            updateDisplay();
+            return;
+        }
+        if (currentExpression.length > 0) {
+            currentExpression = currentExpression.slice(0, -1);
+            if (currentExpression === "") {
+                currentResult = "0";
+                lastWasOperator = false;
+                hasSecondValue = false;
+            } else {
+                updateRealtimeResult();
+            }
+        }
+        updateDisplay();
+    }
+    
+    // ----- Conversiones -----
+    async function convertToBs() {
+        if (errorFlag) return;
+        let valueToConvert;
+        if (lastWasEquals && currentResult !== "0") {
+            valueToConvert = parseFloat(currentResult);
+        } else if (currentExpression !== "") {
+            const evalResult = evaluateExpression(currentExpression);
+            if (evalResult === "Error") return;
+            valueToConvert = parseFloat(evalResult);
+        } else {
+            valueToConvert = parseFloat(currentResult);
+        }
+        if (isNaN(valueToConvert)) return;
+        
+        if (exchangeRate === null) {
+            showConversion("🔄 Obteniendo tasa de cambio...");
+            await fetchExchangeRate();
+            if (exchangeRate === null) {
+                showConversion("❌ Error al obtener tasa de cambio");
+                setTimeout(() => hideConversionDisplay(), 2000);
+                return;
+            }
+        }
+        const converted = valueToConvert * exchangeRate;
+        let formatted;
+        if (converted >= 1000) {
+            formatted = converted.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } else if (converted >= 1) {
+            formatted = converted.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } else {
+            formatted = converted.toLocaleString('es-VE', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+        }
+        showConversion(`Bs ${formatted} (1 USD = ${exchangeRate.toFixed(2)} Bs)`);
+    }
+    
+    async function convertToUsd() {
+        if (errorFlag) return;
+        let valueToConvert;
+        if (lastWasEquals && currentResult !== "0") {
+            valueToConvert = parseFloat(currentResult);
+        } else if (currentExpression !== "") {
+            const evalResult = evaluateExpression(currentExpression);
+            if (evalResult === "Error") return;
+            valueToConvert = parseFloat(evalResult);
+        } else {
+            valueToConvert = parseFloat(currentResult);
+        }
+        if (isNaN(valueToConvert)) return;
+        
+        if (exchangeRate === null) {
+            showConversion("🔄 Obteniendo tasa de cambio...");
+            await fetchExchangeRate();
+            if (exchangeRate === null) {
+                showConversion("❌ Error al obtener tasa de cambio");
+                setTimeout(() => hideConversionDisplay(), 2000);
+                return;
+            }
+        }
+        const converted = valueToConvert / exchangeRate;
+        let formatted;
+        if (converted >= 1000) {
+            formatted = converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } else {
+            formatted = converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+        }
+        showConversion(`$${formatted} (1 USD = ${exchangeRate.toFixed(2)} Bs)`);
+    }
+    
+    // ----- Acciones básicas de calculadora -----
+    function allClear() {
+        currentExpression = "";
+        currentResult = "0";
+        lastWasOperator = false;
+        lastWasEquals = false;
+        errorFlag = false;
+        hasSecondValue = false;
+        hideConversionDisplay();
+        updateDisplay();
+    }
+    
+    function addDigit(digit) {
+        if (errorFlag) return;
+        if (lastWasEquals) {
+            currentExpression = "";
+            lastWasEquals = false;
+            hasSecondValue = false;
+            hideConversionDisplay();
+        }
+        if (currentExpression === "" && digit === "0") return;
+        currentExpression += digit;
+        lastWasOperator = false;
+        updateRealtimeResult();
+    }
+    
+    function addDecimal() {
+        if (errorFlag) return;
+        if (lastWasEquals) {
+            currentExpression = "";
+            lastWasEquals = false;
+            hasSecondValue = false;
+            hideConversionDisplay();
+        }
+        let lastNumber = currentExpression.split(/[+\-*/÷×]/).pop();
+        if (lastNumber && lastNumber.includes('.')) return;
+        if (currentExpression === "" || /[+\-*/÷×]$/.test(currentExpression)) {
+            currentExpression += "0.";
+        } else {
+            currentExpression += ".";
+        }
+        lastWasOperator = false;
+        updateRealtimeResult();
+    }
+    
+    function addOperator(op) {
+        if (errorFlag) return;
+        hideConversionDisplay();
+        if (lastWasEquals) {
+            if (currentResult !== "Error" && currentResult !== "0") {
+                currentExpression = currentResult;
+            } else {
+                currentExpression = "";
+            }
+            lastWasEquals = false;
+        }
+        let operator = op;
+        if (op === '×') operator = '*';
+        if (op === '÷') operator = '/';
+        if (currentExpression === "" && operator === '-') {
+            currentExpression = "-";
+            lastWasOperator = true;
+            updateDisplay();
+            return;
+        }
+        if (currentExpression === "-" && operator !== '-') {
+            currentExpression = "";
+        }
+        if (lastWasOperator && currentExpression.length > 0 && !/^[-]$/.test(currentExpression)) {
+            currentExpression = currentExpression.slice(0, -1) + operator;
+        } else {
+            currentExpression += operator;
+        }
+        lastWasOperator = true;
+        updateRealtimeResult();
+    }
+    
+    function toggleSign() {
+        if (errorFlag) return;
+        hideConversionDisplay();
+        if (lastWasEquals) {
+            currentExpression = "";
+            lastWasEquals = false;
+        }
+        if (currentExpression === "") {
+            currentExpression = "-";
+            updateDisplay();
+            return;
+        }
+        let match = currentExpression.match(/([+\-*/÷×]?)(-?\d+(?:\.\d+)?)$/);
+        if (match) {
+            let number = match[2];
+            let newNumber = (parseFloat(number) * -1).toString();
+            if (newNumber === "-0") newNumber = "0";
+            currentExpression = currentExpression.slice(0, -number.length) + newNumber;
+            updateRealtimeResult();
+        }
+    }
+    
+    function percentOperator() {
+        if (errorFlag) return;
+        hideConversionDisplay();
+        if (lastWasEquals) {
+            currentExpression = "";
+            lastWasEquals = false;
+        }
+        if (currentExpression === "") {
+            currentResult = "0";
+            updateDisplay();
+            return;
+        }
+        currentExpression += "%";
+        updateRealtimeResult();
+    }
+    
+    function equals() {
+        if (errorFlag) {
+            allClear();
+            return;
+        }
+        hideConversionDisplay();
+        if (currentExpression === "") return;
+        if (/[+\-*/÷×]$/.test(currentExpression)) {
+            currentExpression = currentExpression.slice(0, -1);
+        }
+        let finalResult = evaluateExpression(currentExpression);
+        if (finalResult === "Error") {
+            errorFlag = true;
+            updateDisplay();
+            return;
+        }
+        currentResult = finalResult;
+        currentExpression = "";
+        lastWasEquals = true;
+        lastWasOperator = false;
+        hasSecondValue = false;
+        updateDisplay();
+    }
+    
+    // ----- Eventos UI -----
+    function handleButtonClick(event) {
+        const btn = event.currentTarget;
+        if (btn.hasAttribute('data-digit')) {
+            addDigit(btn.getAttribute('data-digit'));
+        } else if (btn.hasAttribute('data-dot')) {
+            addDecimal();
+        } else if (btn.hasAttribute('data-op')) {
+            addOperator(btn.getAttribute('data-op'));
+        } else if (btn.hasAttribute('data-action')) {
+            const action = btn.getAttribute('data-action');
+            switch (action) {
+                case 'ac': allClear(); break;
+                case 'backspace': backspace(); break;
+                case 'sign': toggleSign(); break;
+                case 'percent': percentOperator(); break;
+                case 'equals': equals(); break;
+                case 'convertBs': convertToBs(); break;
+                case 'convertUsd': convertToUsd(); break;
+            }
+        }
+    }
+    
+    function handleKeyboard(e) {
+        const key = e.key;
+        if (key === 'Backspace') {
+            e.preventDefault();
+            backspace();
+            return;
+        }
+        const controlKeys = ['Enter', 'Escape', '+', '-', '*', '/', '%', '.', '0','1','2','3','4','5','6','7','8','9', '='];
+        if (controlKeys.includes(key) || (key >= '0' && key <= '9')) {
+            e.preventDefault();
+        }
+        if (key >= '0' && key <= '9') addDigit(key);
+        else if (key === '.') addDecimal();
+        else if (key === '+') addOperator('+');
+        else if (key === '-') addOperator('-');
+        else if (key === '*') addOperator('×');
+        else if (key === '/') addOperator('÷');
+        else if (key === '%') percentOperator();
+        else if (key === 'Enter' || key === '=') equals();
+        else if (key === 'Escape') allClear();
+    }
+    
+    function init() {
+        allClear();
+        fetchExchangeRate();
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(btn => btn.addEventListener('click', handleButtonClick));
+        window.addEventListener('keydown', handleKeyboard);
+    }
+    
+    init();
+</script>
 </body>
 </html>
