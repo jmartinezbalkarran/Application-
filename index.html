@@ -31,7 +31,7 @@
             transition: all 0.2s ease;
         }
 
-        /* Encabezado con título */
+        /* Encabezado con título y tasa de cambio */
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -44,9 +44,21 @@
             font-weight: 600;
             color: #ff8c42;
             letter-spacing: 1px;
-            margin: 0;
+            margin: 0 0 6px 0;
             font-family: 'Segoe UI', 'Roboto', sans-serif;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .exchange-rate-info {
+            font-size: 0.85rem;
+            color: #9b59b6;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            background: rgba(155, 89, 182, 0.1);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-top: 4px;
         }
 
         .display-dual {
@@ -224,6 +236,9 @@
             .header h1 {
                 font-size: 1.2rem;
             }
+            .exchange-rate-info {
+                font-size: 0.75rem;
+            }
         }
     </style>
 </head>
@@ -231,6 +246,7 @@
 <div class="calculator">
     <div class="header">
         <h1>Jmartinez</h1>
+        <div class="exchange-rate-info" id="exchangeRateDisplay">🔄 Obteniendo tasa...</div>
     </div>
     <div class="display-dual">
         <div class="expression" id="expression">0</div>
@@ -276,7 +292,7 @@
 
 <script>
     // ==============================================================
-    // CALCULADORA JMARTINEZ - CON FORMATO DE MILES, BORRADO UNO A UNO
+    // CALCULADORA JMARTINEZ - CON TASA DE CAMBIO VISIBLE EN EL HEADER
     // ==============================================================
     
     let currentExpression = "";
@@ -292,6 +308,16 @@
     const expressionEl = document.getElementById('expression');
     const resultEl = document.getElementById('result');
     const conversionDisplayEl = document.getElementById('conversionDisplay');
+    const exchangeRateDisplayEl = document.getElementById('exchangeRateDisplay');
+    
+    // ----- Actualizar visualización de la tasa de cambio en el header -----
+    function updateExchangeRateDisplay() {
+        if (exchangeRate !== null && !isNaN(exchangeRate)) {
+            exchangeRateDisplayEl.innerHTML = `1 USD = ${exchangeRate.toFixed(2)} Bs`;
+        } else {
+            exchangeRateDisplayEl.innerHTML = `🔄 Actualizando...`;
+        }
+    }
     
     // ----- Formateo de miles -----
     function formatNumberWithCommas(numStr) {
@@ -318,6 +344,7 @@
             if (data && data.rates && data.rates.VES) {
                 exchangeRate = data.rates.VES;
                 console.log('Tasa USD/VES actualizada:', exchangeRate);
+                updateExchangeRateDisplay();
                 return exchangeRate;
             } else {
                 throw new Error('Tasa VES no disponible');
@@ -325,6 +352,7 @@
         } catch (error) {
             console.error('Error fetching exchange rate:', error);
             exchangeRate = null;
+            updateExchangeRateDisplay();
             return null;
         }
     }
@@ -487,7 +515,7 @@
         updateDisplay();
     }
     
-    // ----- Conversiones -----
+    // ----- Conversiones (sin mostrar la tasa en la tercera pantalla) -----
     async function convertToBs() {
         if (errorFlag) return;
         let valueToConvert;
@@ -520,7 +548,8 @@
         } else {
             formatted = converted.toLocaleString('es-VE', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
         }
-        showConversion(`Bs ${formatted} (1 USD = ${exchangeRate.toFixed(2)} Bs)`);
+        // Mostrar SOLO el valor convertido, sin la tasa
+        showConversion(`Bs ${formatted}`);
     }
     
     async function convertToUsd() {
@@ -553,7 +582,8 @@
         } else {
             formatted = converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
         }
-        showConversion(`$${formatted} (1 USD = ${exchangeRate.toFixed(2)} Bs)`);
+        // Mostrar SOLO el valor convertido, sin la tasa
+        showConversion(`$${formatted}`);
     }
     
     // ----- Acciones básicas de calculadora -----
